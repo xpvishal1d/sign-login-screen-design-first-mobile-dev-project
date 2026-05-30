@@ -1,28 +1,50 @@
 import { FontAwesome } from "@expo/vector-icons";
-import { type Href, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
   Image,
   KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
-  Platform,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const HomeScreen = () => {
+const stylesVars = {
+  brand: "#85cc17",
+  text: "#1c1c1c",
+  muted: "#7b7b7b",
+  placeholder: "#9aa0a6",
+  border: "#dfe3e7",
+  icon: "#414141",
+  iconMuted: "#7d7d7d",
+  danger: "#e84b5b",
+  background: "#ffffff",
+} as const;
+
+export default function SignUpScreen() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const mismatch =
+    confirmPassword.trim().length > 0 && confirmPassword !== password;
 
   const canSubmit = useMemo(() => {
-    return email.trim().length > 0 && password.trim().length > 0;
-  }, [email, password]);
+    return (
+      email.trim().length > 0 &&
+      password.trim().length > 0 &&
+      confirmPassword.trim().length > 0 &&
+      !mismatch
+    );
+  }, [email, password, confirmPassword, mismatch]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -35,15 +57,24 @@ const HomeScreen = () => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
+          <Pressable
+            onPress={() => router.back()}
+            accessibilityRole="button"
+            style={styles.backButton}
+            hitSlop={10}
+          >
+            <FontAwesome name="chevron-left" size={18} color={stylesVars.icon} />
+          </Pressable>
+
           <Image
             source={require("@/assets/images/my-app-assets/logo-app.png")}
             style={styles.logo}
             resizeMode="contain"
           />
 
-          <Text style={styles.title}>Sign In</Text>
+          <Text style={styles.title}>Sign Up For Free</Text>
           <Text style={styles.subtitle}>
-            Let&apos;s experience the joy of telecare AI.
+            Sign up in 1 minute for free!
           </Text>
 
           <View style={styles.form}>
@@ -65,22 +96,11 @@ const HomeScreen = () => {
                 style={styles.input}
                 returnKeyType="next"
               />
-              <View style={styles.inputTrailing}>
-                <FontAwesome
-                  name="hand-pointer-o"
-                  size={16}
-                  color={stylesVars.brand}
-                />
-              </View>
             </View>
 
             <Text style={[styles.label, styles.labelSpacing]}>Password</Text>
-            <View style={styles.inputWrapper}>
-              <FontAwesome
-                name="lock"
-                size={18}
-                color={stylesVars.iconMuted}
-              />
+            <View style={[styles.inputWrapper, mismatch && styles.inputError]}>
+              <FontAwesome name="lock" size={18} color={stylesVars.iconMuted} />
               <TextInput
                 value={password}
                 onChangeText={setPassword}
@@ -90,7 +110,7 @@ const HomeScreen = () => {
                 autoCapitalize="none"
                 autoCorrect={false}
                 style={styles.input}
-                returnKeyType="done"
+                returnKeyType="next"
               />
               <Pressable
                 onPress={() => setShowPassword((v) => !v)}
@@ -107,6 +127,50 @@ const HomeScreen = () => {
               </Pressable>
             </View>
 
+            <Text style={[styles.label, styles.labelSpacing]}>
+              Password Confirmation
+            </Text>
+            <View style={[styles.inputWrapper, mismatch && styles.inputError]}>
+              <FontAwesome name="lock" size={18} color={stylesVars.iconMuted} />
+              <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm your password..."
+                placeholderTextColor={stylesVars.placeholder}
+                secureTextEntry={!showConfirm}
+                autoCapitalize="none"
+                autoCorrect={false}
+                style={styles.input}
+                returnKeyType="done"
+              />
+              <Pressable
+                onPress={() => setShowConfirm((v) => !v)}
+                accessibilityRole="button"
+                accessibilityLabel={
+                  showConfirm ? "Hide confirmation password" : "Show confirmation password"
+                }
+                hitSlop={10}
+                style={styles.inputTrailing}
+              >
+                <FontAwesome
+                  name={showConfirm ? "eye-slash" : "eye"}
+                  size={18}
+                  color={stylesVars.iconMuted}
+                />
+              </Pressable>
+            </View>
+
+            {mismatch && (
+              <View style={styles.errorPill}>
+                <FontAwesome
+                  name="exclamation-circle"
+                  size={14}
+                  color={stylesVars.danger}
+                />
+                <Text style={styles.errorText}>ERROR: Password do not match!</Text>
+              </View>
+            )}
+
             <Pressable
               style={[
                 styles.primaryButton,
@@ -115,65 +179,25 @@ const HomeScreen = () => {
               disabled={!canSubmit}
               accessibilityRole="button"
             >
-              <Text style={styles.primaryButtonText}>Sign In</Text>
+              <Text style={styles.primaryButtonText}>Sign Up</Text>
               <FontAwesome name="arrow-right" size={16} color="#fff" />
             </Pressable>
           </View>
 
-          <View style={styles.socialRow}>
-            <Pressable style={styles.socialButton} accessibilityRole="button">
-              <FontAwesome
-                name="facebook"
-                size={20}
-                color={stylesVars.icon}
-              />
-            </Pressable>
-            <Pressable style={styles.socialButton} accessibilityRole="button">
-              <FontAwesome name="google" size={20} color={stylesVars.icon} />
-            </Pressable>
-            <Pressable style={styles.socialButton} accessibilityRole="button">
-              <FontAwesome
-                name="instagram"
-                size={20}
-                color={stylesVars.icon}
-              />
-            </Pressable>
-          </View>
-
           <View style={styles.footerRow}>
-            <Text style={styles.footerText}>Don&apos;t have an account? </Text>
+            <Text style={styles.footerText}>Already have an account? </Text>
             <Pressable
               accessibilityRole="button"
-              onPress={() => router.push("/signup")}
+              onPress={() => router.replace("/")}
             >
-              <Text style={styles.footerLink}>Sign Up.</Text>
+              <Text style={styles.footerLink}>Sign In.</Text>
             </Pressable>
           </View>
-
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push("/forgot-password" as Href)}
-          >
-            <Text style={styles.forgotLink}>Forgot your password?</Text>
-          </Pressable>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};
-
-export default HomeScreen;
-
-const stylesVars = {
-  brand: "#85cc17",
-  text: "#1c1c1c",
-  muted: "#7b7b7b",
-  placeholder: "#9aa0a6",
-  border: "#dfe3e7",
-  icon: "#414141",
-  iconMuted: "#7d7d7d",
-  background: "#ffffff",
-} as const;
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -186,19 +210,31 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 22,
-    paddingTop: 20,
+    paddingTop: 18,
     paddingBottom: 22,
     alignItems: "center",
+  },
+  backButton: {
+    alignSelf: "flex-start",
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: stylesVars.border,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    marginBottom: 6,
   },
   logo: {
     width: 60,
     height: 60,
-    marginTop: 6,
-    marginBottom: 14,
+    marginTop: 4,
+    marginBottom: 12,
   },
   title: {
     fontSize: 26,
-    fontWeight: "700",
+    fontWeight: "800",
     color: stylesVars.text,
     marginBottom: 6,
   },
@@ -231,6 +267,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: "#fff",
   },
+  inputError: {
+    borderColor: stylesVars.danger,
+  },
   input: {
     flex: 1,
     marginLeft: 10,
@@ -243,8 +282,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  errorPill: {
+    marginTop: 10,
+    borderWidth: 1,
+    borderColor: "#f1b4bc",
+    backgroundColor: "#ffecee",
+    borderRadius: 12,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  errorText: {
+    color: stylesVars.danger,
+    fontSize: 12,
+    fontWeight: "700",
+  },
   primaryButton: {
-    marginTop: 16,
+    marginTop: 14,
     backgroundColor: stylesVars.brand,
     borderRadius: 14,
     paddingVertical: 12,
@@ -260,23 +316,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: "#fff",
     fontSize: 14,
-    fontWeight: "700",
-  },
-  socialRow: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 14,
-    marginTop: 18,
-  },
-  socialButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: stylesVars.border,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#fff",
+    fontWeight: "800",
   },
   footerRow: {
     flexDirection: "row",
@@ -292,13 +332,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: stylesVars.brand,
     textDecorationLine: "underline",
-    fontWeight: "700",
-  },
-  forgotLink: {
-    marginTop: 10,
-    fontSize: 12,
-    color: stylesVars.brand,
-    textDecorationLine: "underline",
-    fontWeight: "700",
+    fontWeight: "800",
   },
 });
+
